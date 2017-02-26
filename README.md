@@ -11,6 +11,10 @@ Basic grunt build-step boilerplate
 
 ES5 penner equations ported to normalised (0-1) progress value
 
+## snippet-touch-enabled-button/
+
+Nice way of binding touch events on a button for touch screens
+
 ## ios-safari-scrolling-container-shim.js
 Touch handling and overscrolling shim for iOS Safari when using a div as the primary scrolling container. Allows you to put fixed shell elements in the page using position absolute, which was preferred compared to position fixed for older iOS versions.
 
