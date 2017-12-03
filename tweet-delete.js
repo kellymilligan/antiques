@@ -1,10 +1,12 @@
 (function () {
   let items = [].slice.call(document.querySelectorAll('.dropdown-link'));
-  items.forEach(item => {
+  items.forEach((item, index) => {
     if (item.innerHTML === 'Delete Tweet') {
-      item.click();
-      var confirm = document.querySelector('.delete-action');
-      confirm.click();
+      setTimeout( () => {
+        item.click();
+        var confirm = document.querySelector('.delete-action');
+        confirm.click();
+      }, 20 * index)
     }
   })
 })()
