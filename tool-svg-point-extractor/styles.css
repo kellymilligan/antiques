@@ -1,0 +1,258 @@
+html { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: inherit; }
+html, body { height: 100%; background: #000; font-family: 'Georgia', serif; font-size: 14px; line-height: 1.5; }
+body { padding: 15px; margin: 0; }
+
+label {
+
+    font-weight: bold;
+    font-style: italic;
+
+}
+
+input, textarea {
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    background: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+
+    font-family: monospace;
+
+}
+
+button {
+
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+
+    padding: 10px 20px 12px;
+
+    color: #fff;
+    font-family: inherit;
+    font-weight: bold;
+    font-style: italic;
+    font-size: 110%;
+
+    background: #000;
+    border: 0 none;
+
+    cursor: pointer;
+
+}
+
+button:hover {
+
+    background: rgba(0, 0, 0, 0.7);
+
+}
+
+textarea { padding: 20px; resize: none; }
+input { padding: 10px; font-size: 105%; line-height: 1; }
+
+input:focus, textarea:focus {
+
+    background-color: #56ff9f;
+    border-color: #56ff9f;
+    outline: none;
+
+}
+
+.input, .output {
+
+    width: 100%;
+    height: 50%;
+    padding: 50px;
+
+    /* border-radius: 2px; */
+
+}
+
+.input {
+
+    top: 2%;
+
+    background: #fff;
+
+}
+
+.output {
+
+    top: 51%;
+
+    background: #e8e8e8;
+
+}
+
+
+.input__control {
+
+    position: relative;
+
+    display: inline-block;
+    vertical-align: top;
+    width: 65%;
+    height: 70%;
+    margin-right: -0.25em;
+    margin-bottom: 20px;
+
+}
+
+.input__control label {
+
+    position: absolute;
+    left: 24px;
+    top: 21px;
+    display: block;
+
+}
+
+.input__control textarea {
+
+    width: calc( 100% - 150px );
+    height: 100%;
+    padding-top: 55px;
+    padding-right: 170px;
+
+}
+
+.input__preview {
+
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    width: 150px;
+    height: 100%;
+
+    text-align: center;
+
+    background: rgba(0, 0, 0, 0.1);
+
+}
+
+.input__preview::before {
+
+    content: 'Svg preview:';
+
+    position: absolute;
+    left: 0;
+    top: 10px;
+
+    display: block;
+    width: 100%;
+
+    color: rgba(0, 0, 0, 0.3);
+    font-size: 85%;
+    font-style: italic;
+
+}
+
+.input__preview svg {
+
+    margin: 30% 20% 0;
+
+    max-width: 60%;
+    max-height: 60%;
+
+}
+
+.input__process input {
+
+    width: 60px;
+    margin-left: 10px;
+
+}
+
+.input__process button {
+
+    margin-left: 30px;
+
+    padding: ;
+
+}
+
+.input__instructions {
+
+    display: inline-block;
+    vertical-align: top;
+    width: 30%;
+    height: 80%;
+    margin-left: 5%;
+    margin-right: -0.25em;
+
+}
+
+.input__instructions p {
+
+    margin-top: 0;
+
+}
+
+.input__instructions p .code {
+
+    display: inline-block;
+    padding: 0 2px;
+
+    color: #9a2525;
+
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.05);
+
+}
+
+.output__dimensions {
+
+    margin-bottom: 20px;
+
+}
+
+.output__dimensions input {
+
+    width: 130px;
+    margin-left: 10px;
+    margin-right: 40px;
+
+}
+
+.output__points {
+
+    position: relative;
+
+    height: 50%;
+    margin-bottom: 20px;
+
+}
+
+.output__points label {
+
+    position: absolute;
+    left: 24px;
+    top: 21px;
+    display: block;
+
+}
+
+.output__points label span:last-of-type {
+
+    display: none;
+
+}
+
+.output__points textarea {
+
+    width: 100%;
+    height: 100%;
+    padding-top: 55px;
+
+}
+
+.output__options button {
+
+    margin-right: 5px;
+
+}

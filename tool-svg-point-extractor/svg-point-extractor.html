@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <title>SVG point extractor - get points along an SVG path for animating with canvas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script type="text/javascript" src="snap.svg.js"></script>
+</head>
+<body>
+
+    <div class="input">
+
+        <div class="input__control">
+            <label>Paste your SVG code:</label>
+            <textarea id="input-textarea"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 72.04173"><title>drop4</title><path d="M8.99706,49.08c0.106,4.05294,5.24408,6.89295,6.8751,9.88429A7.99611,7.99611,0,1,1,1,63.04182a7.95468,7.95468,0,0,1,1.12787-4.08123c1.62711-2.97451,6.71787-5.84715,6.86919-9.87181L8.99412,0.00006" style="fill:none;stroke:#231f20;stroke-linejoin:round;stroke-width:2px"/></svg></textarea>
+
+
+            <div id="input-preview" class="input__preview">
+
+            </div>
+        </div>
+
+        <div class="input__instructions">
+            <p>
+                There should only be one instance of <span class="code">&lt;path&gt;</span> in in the SVG. It uses the path's <span class="code">d</span> attribute to create the points. Other stuff like style attributes aren't used. Make sure your svg uses a <span class="code">&lt;path&gt;</span> element, not a <span class="code">&lt;polyline&gt;</span> or <span class="code">&lt;polygon&gt;</span> object. You can convert a shapes to a simple path in Illustrator: Object > Compound Path > Make - or (CMD + 8).
+            </p>
+        </div>
+
+        <div class="input__process">
+            <label>Number of points: </label>
+            <input id="input-count" type="text" maxlength="4" value="200">
+            <button id="input-process">Process</button>
+        </div>
+
+    </div>
+
+    <div class="output">
+
+        <div class="output__dimensions">
+            <label>Width (viewBox):</label>
+            <input id="output-dimensions-width" type="text">
+            <label>Height (viewBox):</label>
+            <input id="output-dimensions-height" type="text">
+        </div>
+
+        <div class="output__points">
+            <label>Points <span id="output-label-normalized">(normalized)</span><span id="output-label-absolute">(absolute)</span></label>
+            <textarea id="output-textarea"></textarea>
+        </div>
+
+        <div class="output__options">
+            <!-- <button id="output-option-origin">Align origin to center</button> -->
+            <button id="output-option-absolute">Get absolute points</button>
+            <button id="output-option-reverse">Get reversed order</button>
+            <button id="output-option-pairs">Get as pairs (comma separated X and Y)</button>
+        </div>
+
+    </div>
+
+    <script type="text/javascript">
+
+
+        // Elements
+        // -------------------------------------------------------------------------------------------
+
+        var inputTextarea = document.getElementById('input-textarea');
+        var inputCount = document.getElementById('input-count');
+        var inputProcess = document.getElementById('input-process');
+        var inputPreview = document.getElementById('input-preview');
+
+        var outputDimensionsWidth = document.getElementById('output-dimensions-width');
+        var outputDimensionsHeight = document.getElementById('output-dimensions-height');
+        var outputLabelNormalized = document.getElementById('output-label-normalized');
+        var outputLabelAbsolute = document.getElementById('output-label-absolute');
+        var outputTextarea = document.getElementById('output-textarea');
+        // var outputOptionOrigin = document.getElementById('output-option-origin');
+        var outputOptionAbsolute = document.getElementById('output-option-absolute');
+        var outputOptionReverse = document.getElementById('output-option-reverse');
+        var outputOptionPairs = document.getElementById('output-option-pairs');
+
+
+        // States
+        // -------------------------------------------------------------------------------------------
+
+        var isOrigin = false;
+        var isAbsolute = false;
+        var isReversed = false;
+        var isPairs = false;
+
+
+        // Events
+        // -------------------------------------------------------------------------------------------
+
+        inputTextarea.addEventListener('focus', function () {
+
+            inputTextarea.select();
+        });
+
+        inputProcess.addEventListener('click', function () {
+
+            getPoints();
+        });
+
+        outputTextarea.addEventListener('focus', function () { outputTextarea.select(); });
+
+        // outputOptionOrigin.addEventListener('click', function () {
+
+        //     if ( isOrigin ) {
+
+        //         isOrigin = false;
+        //         outputOptionOrigin.style.backgroundColor = '#000';
+        //     }
+        //     else {
+
+        //         isOrigin = true;
+        //         outputOptionOrigin.style.backgroundColor = '#1c0';
+        //     }
+
+        //     getPoints();
+        // });
+
+        outputOptionAbsolute.addEventListener('click', function () {
+
+            if ( isAbsolute ) {
+
+                isAbsolute = false;
+                outputOptionAbsolute.style.backgroundColor = '#000';
+                outputLabelAbsolute.style.display = 'none';
+                outputLabelNormalized.style.display = 'inline';
+            }
+            else {
+
+                isAbsolute = true;
+                outputOptionAbsolute.style.backgroundColor = '#1c0';
+                outputLabelNormalized.style.display = 'none';
+                outputLabelAbsolute.style.display = 'inline';
+            }
+
+            getPoints();
+        });
+
+        outputOptionReverse.addEventListener('click', function () {
+
+            if ( isReversed ) {
+
+                isReversed = false;
+                outputOptionReverse.style.backgroundColor = '#000';
+            }
+            else {
+
+                isReversed = true;
+                outputOptionReverse.style.backgroundColor = '#1c0';
+            }
+
+            getPoints();
+        });
+
+        outputOptionPairs.addEventListener('click', function () {
+
+            if ( isPairs ) {
+
+                isPairs = false;
+                outputOptionPairs.style.backgroundColor = '#000';
+            }
+            else {
+
+                isPairs = true;
+                outputOptionPairs.style.backgroundColor = '#1c0';
+            }
+
+            getPoints();
+        });
+
+
+        // Processing
+        // -------------------------------------------------------------------------------------------
+
+        function getPoints(origin, absolute, reversed, pairs) {
+
+            origin = origin || isOrigin;
+            absolute = absolute || isAbsolute;
+            reversed = reversed || isReversed;
+            pairs = pairs || isPairs;
+
+            inputPreview.innerHTML = inputTextarea.value;
+
+            var svgEl = inputPreview.children[0];
+
+            var width = svgEl.getAttribute('viewBox').split(' ')[2];
+            var height = svgEl.getAttribute('viewBox').split(' ')[3];
+
+            svgEl.setAttribute('width', width);
+            svgEl.setAttribute('height', height);
+
+            var svg = Snap(svgEl);
+            var path = svgEl.getElementsByTagName('path')[0];
+
+            var length = path.getTotalLength();
+            var count = inputCount.value;
+
+            var position, point, coord, xCoord, yCoord;
+            var string = "[";
+
+            if ( reversed ) {
+
+                for ( var i = count; i > 0; i-- ) {
+
+                    position = ( i / ( count - 1 ) ) * length;
+                    point = path.getPointAtLength(position);
+
+                    if ( pairs ) {
+
+                        coord = absolute ? point.x + ',' + point.y : point.x / width + ',' + point.y / height;
+                        string += "\"" + coord.toString() + "\"";
+                    }
+                    else {
+
+                        xCoord = absolute ? point.x : point.x / width;
+                        yCoord = absolute ? point.y : point.y / height;
+
+                        string += "\"" + xCoord.toString() + "\"";
+                        string += ",";
+                        string += "\"" + yCoord.toString() + "\"";
+                    }
+
+                    if ( i > 1 ) { string += ","; }
+                }
+            }
+            else {
+
+                for ( var j = 0; j < count; j++ ) {
+
+                    position = ( j / ( count - 1 ) ) * length;
+                    point = path.getPointAtLength(position);
+
+                    if ( pairs ) {
+
+                        coord = absolute ? point.x + ',' + point.y : point.x / width + ',' + point.y / height;
+                        string += "\"" + coord.toString() + "\"";
+                    }
+                    else {
+
+                        xCoord = absolute ? point.x : point.x / width;
+                        yCoord = absolute ? point.y : point.y / height;
+
+                        string += "\"" + xCoord.toString() + "\"";
+                        string += ",";
+                        string += "\"" + yCoord.toString() + "\"";
+                    }
+
+                    if ( j < count - 1 ) { string += ","; }
+                }
+            }
+
+            string += "]";
+
+            outputDimensionsWidth.value = width;
+            outputDimensionsHeight.value = height;
+
+            outputTextarea.innerText = string;
+            outputTextarea.select();
+        }
+
+    </script>
+
+</body>
+</html>
